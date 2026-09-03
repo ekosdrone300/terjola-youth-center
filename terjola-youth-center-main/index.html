@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="ka">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>თერჯოლის მოსწავლე-ახალგაზრდობის ცენტრი</title>
+    
+    <!-- Firebase & EmailJS ბიბლიოთეკები -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+
+    <link rel="icon" href="/logo.png" type="image/png">
+    <meta name="theme-color" content="#3b82f6">
+    <link rel="apple-touch-icon" href="/logo.png">
+
+    <link href="https://fonts.googleapis.com/css2?family=BPG+Banner+Caps&family=Noto+Sans+Georgian:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- ვაკავშირებთ დიზაინის ფაილს -->
+    <link rel="stylesheet" href="style.css">
+  </head>
+  <body>
+
+    <div id="loader-overlay"><div class="spinner"></div><h3 style="color: var(--primary); font-family: 'BPG Banner Caps', sans-serif;">სისტემა იტვირთება...</h3></div>
+    
+    <div id="maintenance-overlay">
+        <i class="fas fa-tools" style="font-size: 50px; color: var(--danger); margin-bottom: 20px;"></i>
+        <h2 style="color: var(--danger);">სისტემა დროებით გათიშულია</h2>
+        <p style="color: #475569; max-width: 400px; line-height: 1.5;">მიმდინარეობს ტექნიკური სამუშაოები. გთხოვთ, შემოხვიდეთ მოგვიანებით.</p>
+    </div>
+
+    <div id="scheduleModal" class="modal-overlay">
+      <div class="modal-box">
+        <div class="modal-header"><h3 style="margin:0; color:var(--primary); font-size: 16px;"><i class="fas fa-calendar-alt"></i> კლუბების განრიგი</h3><div onclick="document.getElementById('scheduleModal').style.display='none'" style="cursor:pointer; font-size:28px; color:#94a3b8;">&times;</div></div>
+        <div class="modal-body" id="scheduleContent">იტვირთება...</div>
+      </div>
+    </div>
+    
+    <div id="passChangeModal" class="modal-overlay">
+      <div class="modal-box" style="max-width: 400px;">
+        <div class="modal-header"><h3 style="margin:0; color:var(--primary); font-size: 16px;"><i class="fas fa-key"></i> პაროლის შეცვლა</h3><div onclick="document.getElementById('passChangeModal').style.display='none'" style="cursor:pointer; font-size:28px; color:#94a3b8;">&times;</div></div>
+        <div class="modal-body">
+          <input type="password" id="oldPass" placeholder="ძველი პაროლი" required>
+          <input type="password" id="newPass" placeholder="ახალი პაროლი" required>
+          <input type="password" id="newPassConfirm" placeholder="გაიმეორეთ ახალი პაროლი" required>
+          <button class="submit-btn" id="btnChangePass" onclick="submitPasswordChange()"><i class="fas fa-save"></i> შენახვა</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="termsModal" class="modal-overlay">
+      <div class="modal-box">
+        <div class="modal-header"><h3 style="margin:0; color:var(--primary); font-size: 16px;"><i class="fas fa-file-signature"></i> თანხმობის დოკუმენტი</h3><div onclick="document.getElementById('termsModal').style.display='none'" style="cursor:pointer; font-size:28px; color:#94a3b8;">&times;</div></div>
+        <div class="modal-body" style="font-family: 'Sylfaen', serif; text-align: justify; font-size: 14px; line-height: 1.5; color: #000;">
+            <p style="text-align:center; font-size:13px; margin-bottom: 25px;">ა(ა)იპ სკოლისგარეშე სააღმზრდელო დაწესებულება თერჯოლის მოსწავლე-ახალგაზრდობის სოციალური დაცვის მოქალაქეობრივი და ესთეტიკური აღზრდის მუნიციპალური ცენტრის</p>
+            <p style="font-weight:bold; margin-bottom: 20px;">თანხმობა ბავშვის პერსონალური მონაცემების დამუშავებაზე</p>
+            <p style="margin-bottom: 20px;"><b>მე, ქვემოთ ხელმომწერი</b> ____________________________________________________<br><span style="font-size: 11px; margin-left: 170px;">(მშობლის/კანონიერი წარმომადგენლის სახელი, გვარი)</span></p>
+            <p style="margin-bottom: 15px;">ვაცხადებ თანხმობას, რომ ა(ა)იპ სკოლისგარეშე სააღმზრდელო დაწესებულება, თერჯოლის მოსწავლე - ახალგაზრდობის სოციალური დაცვის, მოქალაქეობრივი და ესთეტიკური აღზრდის მუნიციპალურმა ცენტრმა დაამუშავოს ჩემი შვილის (ების) მზრუნველობაში მყოფი ბავშვის (ების)</p>
+            <div style="text-align:center; margin: 15px 0; border-top: 1px dashed #000; border-bottom: 1px dashed #000; padding: 10px 0;">(ბავშვის მონაცემები)</div>
+            <p><b>შემდეგი პერსონალური მონაცემები:</b><br>- სახელი, გვარი;<br>- პირადი ნომერი;<br>- სკოლა, კლასი;<br>- საცხოვრებელი მისამართი და საკონტაქტო ინფორმაცია;<br>- სასწავლო ჯგუფის, წრის ან კლუბის შესახებ ინფორმაცია;<br>- გასვლით სასწავლო - შემოქმედებით საქმიანობაში მონაწილეობა.</p>
+            <p><b>მონაცემების დამუშავების მიზანია:</b><br>ბავშვის სასწავლო და შემოქმედებით პროცესში ჩართვა, აღრიცხვა, უსაფრთხოების უზრუნველყოფა და ა(ა)იპ-ის საქმიანობასთან დაკავშირებული ინფორმაციის მართვა.<br>პერსონალური მონაცემების დამუშავება განხორციელდება საქართველოს პერსონალურ მონაცემთა დაცვის კანონმდებლობის სრული დაცვით.<br>მე ინფორმირებული ვარ, რომ მაქვს უფლება ნებისმიერ დროს მოვითხოვო მონაცემების განახლება, შესწორება ან მათი წაშლა, აგრეთვე თანხმობის გაუქმება.</p>
+            <div style="margin-top: 40px;"><div style="margin-bottom: 25px;">თარიღი: ___ / ___ / 20___ წ.</div><div>მშობლის/კანონიერი წარმომადგენლის ხელმოწერა: _________________________</div></div>
+            <div style="text-align:center; margin-top:30px;"><button onclick="acceptTerms()" style="background:var(--secondary); color:#fff; padding:12px 30px; border:none; border-radius:12px; font-weight:bold; cursor:pointer; font-size:15px; font-family:'BPG Banner Caps', sans-serif; box-shadow: 0 4px 10px rgba(16, 185, 129, 0.3); transition: 0.2s;"><i class="fas fa-check"></i> გავეცანი და ვეთანხმები</button></div>
+        </div>
+      </div>
+    </div>
+
+    <h1 style="margin-top:0;">თერჯოლის მოსწავლე-ახალგაზრდობის ცენტრი</h1>
+
+    <div class="main-menu" id="mainMenu">
+      <div class="card" onclick="showSection('studentReg')"><i class="fas fa-user-graduate"></i><span>რეგისტრაცია</span></div>
+      <div class="card" onclick="openSchedule()"><i class="fas fa-calendar-alt"></i><span>განრიგი</span></div>
+      <div class="card" onclick="showSection('teacherLogin')"><i class="fas fa-chalkboard-teacher"></i><span>მასწავლებელი</span></div>
+      <div class="card" onclick="showSection('adminPanel')"><i class="fas fa-user-shield"></i><span>ადმინი</span></div>
+      <div class="card" onclick="showSection('dpoPanel')" style="border-bottom-color:#f59e0b;"><i class="fas fa-file-shield" style="color:#f59e0b;"></i><span>მონაცემთა ოფიცერი</span></div>
+      <div class="card" onclick="showSection('sysPanel')" style="border-bottom-color: var(--danger);"><i class="fas fa-server" style="color: var(--danger);"></i><span style="color: var(--danger);">სისტემური</span></div>
+    </div>
+
+    <!-- სარეგისტრაციო პანელი -->
+    <div id="studentReg" class="section-container">
+      <div class="close-btn" onclick="goHome()"><i class="fas fa-times"></i></div>
+      <h2 style="text-align:center; color:var(--primary); margin-top:0; font-size: 1.4rem;"><i class="fas fa-clipboard-list"></i> რეგისტრაცია</h2>
+      <div class="flex-row"><div style="flex:1"><input type="text" id="sName" placeholder="სახელი *" required></div><div style="flex:1"><input type="text" id="sSurname" placeholder="გვარი *" required></div></div>
+      <input type="text" id="sPId" placeholder="პირადი ნომერი (არასავალდებულო)" maxlength="11">
+      <div class="flex-row" style="align-items: center;"><div style="flex:1"><label style="font-size:12px; color:#64748b; margin-left: 5px; font-weight: bold;">დაბადების თარიღი</label><input type="date" id="sBirthDate"></div><div style="flex:1"><select id="sGender" style="margin-top:20px;"><option value="მდ">მდედრობითი</option><option value="მმ">მამრობითი</option></select></div></div>
+      <input type="text" id="sSchool" placeholder="სკოლა / სასწავლებელი *" required>
+      <div class="flex-row">
+          <div style="flex:1"><select id="sClass" required><option value="">-- კლასი * --</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option><option value="11">11</option><option value="12">12</option></select></div>
+          <div style="flex:1"><select id="sGradeLevel" required><option value="">-- საფეხური * --</option><option value="დაწყებითი (I-IV)">დაწყებითი (I-IV)</option><option value="საბაზო (V-IX)">საბაზო (V-IX)</option><option value="საშუალო (X-XII)">საშუალო (X-XII)</option></select></div>
+      </div>
+      <hr style="border:0; border-top:1px dashed #cbd5e1; margin:25px 0;">
+      <h4 style="margin:0 0 10px 5px; color:#475569; font-size: 14px;">მშობლის ინფო</h4>
+      <input type="text" id="sParentName" placeholder="მშობლის სახელი და გვარი *" required>
+      <input type="tel" id="sParentPhone" placeholder="მშობლის ტელეფონი *" required>
+      <input type="email" id="sParentEmail" placeholder="ელ-ფოსტა (არასავალდებულო)">
+      
+      <label style="font-weight:bold; font-size:14px; margin-top:25px; display:block; color:var(--primary); margin-left: 5px;">აირჩიეთ კლუბები *</label>
+      <div id="sClubContainer" style="display:flex; flex-direction:column; gap:8px;"></div>
+      
+      <div style="font-size:13px; margin-top:25px; background:#fffbeb; padding:18px; border-radius:14px; border-left:4px solid #f59e0b;">
+         <p style="margin-top:0; color:#b45309; font-weight:bold;"><i class="fas fa-info-circle"></i> აუცილებელია დოკუმენტის გაცნობა</p>
+         <button type="button" onclick="document.getElementById('termsModal').style.display='flex'" style="background:#f59e0b; color:white; border:none; padding:12px 15px; border-radius:10px; cursor:pointer; font-weight:bold; margin-bottom:15px; width: 100%;"><i class="fas fa-file-pdf"></i> დოკუმენტის გახსნა</button>
+         <label style="display:flex; gap:10px; margin-bottom:12px; align-items: center; cursor:pointer;"><input type="checkbox" id="checkInfo" style="width:18px; height:18px; margin:0;"><span>ინფორმაცია სწორია</span></label>
+         <label style="display:flex; gap:10px; opacity:0.6; align-items: center;" id="consentLabel"><input type="checkbox" id="checkConsent" style="width:18px; height:18px; margin:0;" disabled><span>თანახმა ვარ მონაცემთა დამუშავებაზე</span></label>
+      </div>
+      <button class="submit-btn" id="regBtn" onclick="submitRegistration()"><i class="fas fa-paper-plane"></i> დარეგისტრირება</button>
+    </div>
+
+    <!-- მასწავლებლის პანელი -->
+    <div id="teacherLogin" class="section-container" style="max-width:400px;">
+      <div class="close-btn" onclick="goHome()"><i class="fas fa-times"></i></div>
+      <h2 style="text-align:center; color:var(--primary); margin-top:0; font-size: 1.4rem;">მასწავლებელი</h2>
+      <input type="email" id="tEmail" placeholder="ელ-ფოსტა"><input type="password" id="tPass" placeholder="პაროლი">
+      <button class="submit-btn" id="tLogBtn" onclick="loginTeacher()">შესვლა</button>
+    </div>
+
+    <div id="teacherDashboard" class="section-container" style="max-width:900px;">
+       <div class="close-btn" onclick="goHome()"><i class="fas fa-times"></i></div>
+       <div style="display:flex; flex-direction: column; gap: 15px;">
+          <h2 id="dashTitle" style="color:var(--primary); margin:0; font-size: 1.4rem; line-height: 1.3;"></h2>
+          <div class="print-hide" style="display:flex; gap:10px;">
+            <button onclick="document.getElementById('passChangeModal').style.display='flex'" style="background:#f59e0b; color:white; border:none; padding:10px 15px; border-radius:10px; cursor:pointer; font-size: 13px; flex: 1; font-weight:bold;"><i class="fas fa-key"></i> პაროლის შეცვლა</button>
+            <button onclick="window.print()" style="background:#64748b; color:white; border:none; padding:10px 15px; border-radius:10px; cursor:pointer; font-size: 13px;"><i class="fas fa-print"></i></button>
+          </div>
+       </div>
+       <div id="studentList" style="margin-top:20px;">იტვირთება...</div>
+    </div>
+
+    <!-- ადმინის პანელი -->
+    <div id="adminPanel" class="section-container">
+        <div class="close-btn" onclick="goHome()"><i class="fas fa-times"></i></div>
+        <div id="adminLoginForm" style="max-width:400px; margin:auto;">
+             <h2 style="text-align:center; color:var(--primary); margin-top:0; font-size: 1.4rem;">ადმინისტრატორი</h2>
+             <input type="password" id="aPass" placeholder="შეიყვანეთ პაროლი">
+             <button class="submit-btn" onclick="loginAdmin()">შესვლა</button>
+        </div>
+        <div id="adminContent" style="display:none;">
+            <div class="admin-btn-group print-hide"><button class="admin-btn active" onclick="switchAdminTab('stats')" id="btnStats">სტატისტიკა</button><button class="admin-btn" onclick="switchAdminTab('list')" id="btnList">ერთიანი სია</button></div>
+            <div id="tabStats" class="tab-content"><div id="adminStatsArea">იტვირთება...</div></div>
+            <div id="tabList" class="tab-content" style="display:none;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; flex-wrap:wrap; gap:10px;">
+                    <input type="text" id="adminSearch" onkeyup="filterTable('adminSearch', 'unifiedListArea')" placeholder="🔍 მოძებნე..." style="width:100%; max-width:300px; margin:0;">
+                    <div style="display:flex; gap:10px; justify-content:flex-end;">
+                        <button onclick="downloadAdminCSV()" class="print-hide" style="background:var(--secondary); color:white; border:none; padding:10px 15px; border-radius:10px; cursor:pointer; font-size: 13px; font-weight:bold;"><i class="fas fa-file-excel"></i> ექსპორტი (Excel)</button>
+                    </div>
+                </div>
+                <div id="unifiedListArea">იტვირთება...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- DPO პანელი -->
+    <div id="dpoPanel" class="section-container" style="max-width:1000px;">
+        <div class="close-btn" onclick="goHome()"><i class="fas fa-times"></i></div>
+        <div id="dpoLoginForm" style="max-width:400px; margin:auto;">
+             <h2 style="text-align:center; color:#f59e0b; margin-top:0; font-size: 1.4rem;"><i class="fas fa-file-shield"></i> ოფიცერი</h2>
+             <input type="password" id="dPass" placeholder="შეიყვანეთ პაროლი">
+             <button class="submit-btn" style="background:linear-gradient(135deg, #f59e0b, #d97706);" onclick="loginDpo()">შესვლა</button>
+        </div>
+        <div id="dpoContent" style="display:none;">
+             <input type="text" id="dpoSearch" onkeyup="filterTable('dpoSearch', 'dpoListArea')" placeholder="🔍 მოძებნე..." style="max-width:300px;">
+             <div id="dpoListArea">იტვირთება...</div>
+        </div>
+    </div>
+
+    <!-- სისტემური პანელი -->
+    <div id="sysPanel" class="section-container" style="max-width:1000px;">
+        <div class="close-btn" onclick="goHome()"><i class="fas fa-times"></i></div>
+        <div id="sysLoginForm" style="max-width:400px; margin:auto;">
+             <h2 style="text-align:center; color:var(--danger); margin-top:0; font-size: 1.4rem;"><i class="fas fa-server"></i> სისტემური ადმინი</h2>
+             <input type="password" id="sysPass" placeholder="შეიყვანეთ სუპერ-პაროლი">
+             <button class="submit-btn danger" onclick="loginSysAdmin()">შესვლა</button>
+        </div>
+        <div id="sysContent" style="display:none;">
+            <div class="admin-btn-group print-hide">
+                <button class="admin-btn danger active" onclick="switchSysTab('Clubs')" id="btnSysClubs">კლუბები</button>
+                <button class="admin-btn danger" onclick="switchSysTab('Staff')" id="btnSysStaff">სტაფი (მასწავლებლები)</button>
+                <button class="admin-btn danger" onclick="switchSysTab('Students')" id="btnSysStudents">მოსწავლეები</button>
+            </div>
+            
+            <div id="tabSysClubs" class="tab-content">
+                <div style="background:#f8fafc; padding:20px; border-radius:14px; margin-bottom:20px; border: 1px solid #e2e8f0;">
+                    <h4 style="margin-top:0; color:#334155;"><i class="fas fa-layer-group"></i> ახალი კლუბის დამატება</h4>
+                    <div class="flex-row">
+                        <input type="text" id="newClubName" placeholder="კლუბის სახელი">
+                        <input type="number" id="newClubLimit" placeholder="ლიმიტი">
+                        <input type="text" id="newClubSchedule" placeholder="განრიგი">
+                        <button onclick="addSysClub()" class="del-btn" style="background:var(--danger); padding: 0 20px;">დამატება</button>
+                    </div>
+                </div>
+                <div id="sysClubsArea">იტვირთება...</div>
+            </div>
+            
+            <div id="tabSysStaff" class="tab-content" style="display:none;">
+                <div style="background:#f8fafc; padding:20px; border-radius:14px; margin-bottom:20px; border: 1px solid #e2e8f0;">
+                    <h4 style="margin-top:0; color:#334155;"><i class="fas fa-user-plus"></i> მასწავლებლის მიმაგრება კლუბზე</h4>
+                    <div class="flex-row">
+                        <input type="text" id="newStaffName" placeholder="სახელი გვარი">
+                        <input type="email" id="newStaffEmail" placeholder="ელ-ფოსტა (შესასვლელად)">
+                        <input type="password" id="newStaffPass" placeholder="პაროლი">
+                        <input type="text" id="newStaffClub" placeholder="კლუბის ზუსტი სახელი">
+                        <button onclick="addSysStaff()" class="del-btn" style="background:var(--danger); padding: 0 20px;">დამატება</button>
+                    </div>
+                </div>
+                <div id="sysStaffArea">იტვირთება...</div>
+            </div>
+            
+            <div id="tabSysStudents" class="tab-content" style="display:none;">
+                <input type="text" id="sysSearch" onkeyup="filterTable('sysSearch', 'sysStudentsArea')" placeholder="🔍 მოძებნე წასაშლელი მოსწავლე..." style="max-width:300px; margin-bottom: 20px;">
+                <div id="sysStudentsArea">იტვირთება...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- AI ჩატი -->
+    <div id="ai-chat-btn" onclick="toggleChat()"><i class="fas fa-robot"></i></div>
+    <div id="ai-chat-window">
+      <div class="chat-header"><span><i class="fas fa-robot"></i> AI ასისტენტი</span><i class="fas fa-times" onclick="toggleChat()" style="cursor:pointer;"></i></div>
+      <div class="chat-body" id="chatBody"><div class="msg bot">გამარჯობა! მე თერჯოლის ცენტრის ვირტუალური ასისტენტი ვარ. რით შემიძლია დაგეხმაროთ?</div></div>
+      <div class="typing-indicator" id="typingIndicator">ბეჭდავს...</div>
+      <div class="chat-input-area">
+        <input type="text" id="chatInput" placeholder="მკითხე რამე..." onkeypress="handleChatEnter(event)">
+        <button onclick="sendChatMessage()"><i class="fas fa-paper-plane"></i></button>
+      </div>
+    </div>
+
+    <div class="app-footer">
+        <div class="creator-badge">შექმნილია ერეკლე კირკიტაძის მიერ</div><br>ვერსია: 4.0.0 (Modular & Optimized) <div id="liveClock" class="live-clock"></div>
+    </div>
+
+    <!-- ვაკავშირებთ ლოგიკის ფაილს -->
+    <script src="app.js"></script>
+  </body>
+</html>
