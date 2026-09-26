@@ -1,0 +1,211 @@
+:root { 
+  --primary: #4f46e5; 
+  --primary-hover: #4338ca;
+  --secondary: #059669; 
+  --accent: #f43f5e; 
+  --danger: #ef4444; 
+  --text: #334155; 
+  --text-light: #64748b;
+  --surface: rgba(255, 255, 255, 0.95);
+  --bg-color: #f8fafc;
+}
+
+* { box-sizing: border-box; outline: none; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+
+body { 
+  font-family: 'Noto Sans Georgian', sans-serif; 
+  background: radial-gradient(circle at top left, #e0e7ff 0%, var(--bg-color) 40%, #f3e8ff 100%);
+  background-attachment: fixed; 
+  margin: 0; padding: 20px 15px; min-height: 100vh; 
+  display: flex; flex-direction: column; align-items: center; color: var(--text); 
+}
+
+/* 💥 მთავარი სათაურის და ლოგოს სტილები (დაპატარავდა ლოგო) */
+.main-header { 
+    text-align: center; 
+    margin-top: 5px; 
+    margin-bottom: 25px; 
+    animation: slideUpFade 0.6s ease-out forwards; 
+}
+.main-logo { 
+    width: 90px; /* <--- 140px-ის ნაცვლად გავხადეთ 90px */
+    height: auto; 
+    margin-bottom: 10px; 
+    filter: drop-shadow(0 8px 12px rgba(79, 70, 229, 0.2)); 
+    transition: transform 0.3s ease; 
+}
+.main-logo:hover { 
+    transform: scale(1.05); 
+}
+
+h1, h2, h3, h4, .modal-header h3 { font-family: 'BPG Banner Caps', sans-serif; color: #1e293b; }
+h1 { font-size: 1.7rem; margin: 0; line-height: 1.4; color: #0f172a; letter-spacing: 0.5px; }
+
+#loader-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #f8fafc; z-index: 99999; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: opacity 0.5s ease; }
+#maintenance-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.98); z-index: 100000; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 20px; backdrop-filter: blur(10px); }
+.spinner { width: 45px; height: 45px; border: 4px solid #e2e8f0; border-top-color: var(--primary); border-radius: 50%; animation: spin 0.8s linear infinite; margin-bottom: 20px; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.main-menu { display: flex; gap: 20px; flex-wrap: wrap; justify-content: center; width: 100%; max-width: 900px; }
+
+/* 💥 მენიუს ბარათები გაძლიერებული ჩრდილით */
+.card { 
+    background: var(--surface); 
+    backdrop-filter: blur(10px); 
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.8); 
+    width: 155px; height: 140px; border-radius: 20px; 
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08); /* <--- ძლიერი საბაზისო ჩრდილი */
+    display: flex; flex-direction: column; justify-content: center; align-items: center; 
+    cursor: pointer; position: relative; overflow: hidden;
+    animation: cardEntrance 0.6s backwards; 
+}
+.card::after { content: ''; position: absolute; bottom: 0; left: 0; width: 100%; height: 4px; background: var(--primary); opacity: 0; transition: 0.3s; }
+.card:nth-child(5)::after { background: #f59e0b; }
+.card:nth-child(6)::after { background: var(--danger); }
+
+.card:hover { 
+    transform: translateY(-6px); 
+    box-shadow: 0 20px 40px rgba(79, 70, 229, 0.15); /* <--- ჰოვერის ეფექტი ჩრდილზე */
+}
+.card:hover::after { opacity: 1; }
+
+.card:nth-child(1) { animation-delay: 0.1s; } .card:nth-child(2) { animation-delay: 0.15s; } .card:nth-child(3) { animation-delay: 0.2s; } .card:nth-child(4) { animation-delay: 0.25s; } .card:nth-child(5) { animation-delay: 0.3s; } .card:nth-child(6) { animation-delay: 0.35s; }
+@keyframes cardEntrance { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+.card i { font-size: 2.2em; margin-bottom: 15px; color: var(--primary); transition: 0.3s; }
+.card:hover i { transform: scale(1.1); }
+.card span { font-size: 0.85em; text-align: center; color: var(--text); font-weight: 600; padding: 0 5px; }
+
+/* 💥 სექციები უკეთესი ჩრდილით */
+.section-container { 
+    display: none; 
+    background: var(--surface); 
+    backdrop-filter: blur(20px); 
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 1); 
+    padding: 35px; border-radius: 24px; 
+    box-shadow: 0 15px 40px rgba(0,0,0,0.08); /* <--- პანელების ძლიერი ჩრდილი */
+    width: 100%; max-width: 900px; margin-top: 10px; position: relative; 
+    animation: slideUpFade 0.4s forwards; 
+}
+@keyframes slideUpFade { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+.close-btn { position: absolute; top: 20px; right: 20px; font-size: 20px; cursor: pointer; color: var(--text-light); width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; background: #f1f5f9; border-radius: 50%; transition: 0.2s; }
+.close-btn:hover { background: #fee2e2; color: var(--danger); transform: rotate(90deg); }
+
+input, select, button { font-family: inherit; }
+input, select { 
+    width: 100%; padding: 15px 18px; margin: 10px 0; 
+    border-radius: 12px; border: 1px solid #cbd5e1; 
+    background: #f8fafc; font-size: 14px; color: var(--text);
+    transition: all 0.2s;
+}
+input:focus, select:focus { border-color: var(--primary); background: #ffffff; box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1); transform: translateY(-1px); }
+input::placeholder { color: #94a3b8; }
+
+button.submit-btn { 
+    width: 100%; padding: 16px; 
+    background: var(--primary); color: white; 
+    border: none; border-radius: 12px; cursor: pointer; 
+    font-weight: 600; font-size: 15px; margin-top: 25px; 
+    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.25); 
+    transition: all 0.3s;
+}
+button.submit-btn:hover:not(:disabled) { background: var(--primary-hover); transform: translateY(-2px); box-shadow: 0 6px 15px rgba(79, 70, 229, 0.35); }
+button.submit-btn.danger { background: var(--danger); box-shadow: 0 4px 12px rgba(239, 68, 68, 0.25); }
+button.submit-btn.danger:hover:not(:disabled) { background: #dc2626; box-shadow: 0 6px 15px rgba(239, 68, 68, 0.35); }
+button.submit-btn:disabled { background: #94a3b8; cursor: not-allowed; box-shadow: none; }
+
+.admin-btn-group { display: flex; gap: 12px; margin-bottom: 25px; flex-wrap: wrap; }
+.admin-btn { flex: 1; min-width: 110px; padding: 12px; border: none; border-radius: 10px; cursor: pointer; background: #f1f5f9; color: var(--text-light); font-weight: 600; font-size: 13px; transition: 0.2s; }
+.admin-btn:hover { background: #e2e8f0; color: var(--text); }
+.admin-btn.active { background: var(--primary); color: white; box-shadow: 0 4px 10px rgba(79, 70, 229, 0.2); }
+.admin-btn.danger.active { background: var(--danger); color: white; box-shadow: 0 4px 10px rgba(239, 68, 68, 0.2); }
+
+.data-table { width: 100%; border-collapse: separate; border-spacing: 0; margin-top: 15px; font-size: 13px; background: white; border-radius: 12px; overflow: hidden; border: 1px solid #e2e8f0; }
+.data-table th, .data-table td { padding: 16px 14px; border-bottom: 1px solid #f1f5f9; text-align: left; }
+.data-table th { background: #f8fafc; color: var(--text-light); font-weight: 600; text-transform: uppercase; font-size: 12px; letter-spacing: 0.5px; }
+.data-table tr:last-child td { border-bottom: none; }
+.data-table tr:hover td { background: #f8fafc; }
+
+.modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.4); z-index: 10000; align-items: center; justify-content: center; backdrop-filter: blur(4px); }
+.modal-box { background: white; width: 95%; max-width: 750px; max-height: 90vh; border-radius: 20px; display: flex; flex-direction: column; margin: 10px; animation: modalPop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15); border: 1px solid #f1f5f9; }
+@keyframes modalPop { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+.modal-header { padding: 20px 25px; border-bottom: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center; background: #f8fafc; border-radius: 20px 20px 0 0; }
+.modal-body { padding: 25px; overflow-y: auto; flex: 1; }
+
+.doc-btn { background: #f59e0b; color: white; border: none; padding: 8px 14px; border-radius: 8px; cursor: pointer; font-size: 12px; font-weight: 600; transition: 0.2s; }
+.doc-btn:hover { background: #d97706; transform: translateY(-1px); }
+.del-btn { background: #fee2e2; color: var(--danger); border: none; padding: 8px 14px; border-radius: 8px; cursor: pointer; font-size: 12px; font-weight: 600; transition: 0.2s; }
+.del-btn:hover { background: var(--danger); color: white; transform: translateY(-1px); }
+
+.flex-row { display: flex; gap: 15px; }
+
+/* 💥 ფუტერი გამოსწორებული მარჯინებით */
+.app-footer { 
+    text-align: center; 
+    color: var(--text-light); 
+    font-size: 12px; 
+    margin-top: auto; 
+    padding: 20px 0 10px 0; /* <--- შევამცირეთ padding რომ ზემოთ ამოიწიოს */
+    width: 100%; 
+}
+.creator-badge { 
+    font-weight: 600; 
+    color: var(--primary); 
+    margin-bottom: 6px; 
+    display: inline-block; 
+    padding: 5px 12px; 
+    background: rgba(255, 255, 255, 0.9); 
+    border: 1px solid #e2e8f0; 
+    border-radius: 20px; 
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05); 
+}
+.live-clock { font-size: 13px; font-weight: 600; color: var(--text-light); margin-top: 6px; font-family: monospace; }
+
+#ai-chat-btn { position: fixed; bottom: 30px; left: 30px; width: 60px; height: 60px; background: var(--primary); border-radius: 50%; display: flex; justify-content: center; align-items: center; color: white; font-size: 24px; cursor: pointer; box-shadow: 0 10px 20px rgba(79, 70, 229, 0.3); z-index: 9999; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+#ai-chat-btn:hover { transform: scale(1.1); background: var(--primary-hover); }
+#ai-chat-window { position: fixed; bottom: 110px; left: 30px; width: 350px; height: 500px; background: rgba(255, 255, 255, 0.98); border-radius: 20px; box-shadow: 0 15px 40px rgba(0,0,0,0.12); display: none; flex-direction: column; z-index: 9999; overflow: hidden; animation: slideUpFade 0.3s ease; border: 1px solid #e2e8f0; }
+.chat-header { background: #f8fafc; color: var(--text); padding: 18px 20px; font-weight: 600; display: flex; justify-content: space-between; align-items: center; font-size: 15px; border-bottom: 1px solid #e2e8f0; }
+.chat-body { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; background: #ffffff; font-size: 14px; }
+.msg { padding: 12px 16px; border-radius: 16px; max-width: 85%; line-height: 1.5; word-wrap: break-word; }
+.msg.bot { background: #f1f5f9; color: var(--text); align-self: flex-start; border-bottom-left-radius: 4px; }
+.msg.user { background: var(--primary); color: white; align-self: flex-end; border-bottom-right-radius: 4px; }
+.typing-indicator { font-size: 12px; color: #94a3b8; padding: 0 20px 10px 20px; display: none; font-style: italic; }
+.chat-input-area { display: flex; padding: 15px; background: white; border-top: 1px solid #e2e8f0; }
+.chat-input-area input { flex: 1; border: 1px solid #e2e8f0; padding: 12px 16px; border-radius: 20px; margin: 0; outline: none; background: #f8fafc; font-size: 14px; }
+.chat-input-area button { background: var(--primary); border: none; width: 44px; height: 44px; border-radius: 50%; color: white; margin-left: 12px; cursor: pointer; transition: 0.2s; display: flex; align-items: center; justify-content: center; }
+.chat-input-area button:hover { background: var(--primary-hover); transform: scale(1.05); }
+
+.old-badge { background: #fef3c7; color: #d97706; padding: 4px 8px; border-radius: 6px; font-size: 10px; margin-left: 8px; vertical-align: middle; display: inline-block; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; border: 1px solid #fde68a; }
+
+#toast-container { position: fixed; bottom: 30px; right: 30px; z-index: 100000; display: flex; flex-direction: column; gap: 12px; pointer-events: none; }
+.toast { background: white; color: var(--text); padding: 16px 22px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); display: flex; align-items: center; gap: 14px; font-weight: 500; font-size: 14px; animation: toastEnter 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; max-width: 350px; pointer-events: all; border: 1px solid #f1f5f9; }
+.toast.success i { color: var(--secondary); }
+.toast.error i { color: var(--danger); }
+.toast.warning i { color: #f59e0b; }
+.toast i { font-size: 1.4rem; }
+.toast.fade-out { animation: toastLeave 0.3s ease forwards; }
+@keyframes toastEnter { from { opacity: 0; transform: translateX(100%) scale(0.9); } to { opacity: 1; transform: translateX(0) scale(1); } }
+@keyframes toastLeave { from { opacity: 1; transform: translateX(0) scale(1); } to { opacity: 0; transform: translateX(100%) scale(0.9); } }
+
+.club-checkbox { width: 18px; height: 18px; accent-color: var(--primary); cursor: pointer; }
+.att-check { width: 18px; height: 18px; margin: 0; accent-color: var(--secondary); cursor: pointer; }
+
+.filter-bar input, .filter-bar select { padding: 10px 14px; border-radius: 10px; font-size: 13px; background: #ffffff; }
+.filter-bar input:focus, .filter-bar select:focus { box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.2); border-color: #f59e0b !important; }
+.dpo-row { transition: opacity 0.3s ease; }
+
+@media print { body { background: white; padding: 0; margin: 0; } .main-menu, .main-header, .card, .close-btn, .submit-btn, .print-hide, h1, #toast-container, .doc-btn, .app-footer, .admin-btn-group, #ai-chat-btn, #ai-chat-window { display: none !important; } .section-container { box-shadow: none; border: none; display: block !important; width: 100%; max-width: 100%; margin: 0; padding: 0; background: white !important; backdrop-filter: none !important; } .tab-content { display: none; } .tab-content.active-print { display: block !important; } }
+@media (max-width: 600px) { 
+    .card { width: 46%; height: 120px; } 
+    .section-container { padding: 25px 20px; width: 100%; border-radius: 20px; margin-top: 0; } 
+    .flex-row { flex-direction: column; gap: 0; } 
+    .data-table { display: block; overflow-x: auto; white-space: nowrap; } 
+    #ai-chat-window { width: calc(100% - 40px); left: 20px; bottom: 100px; height: 60vh; } 
+    #toast-container { bottom: 20px; right: 20px; left: 20px; align-items: center; } 
+    .toast { width: 100%; max-width: 100%; justify-content: center; }
+    @keyframes toastEnter { from { opacity: 0; transform: translateY(100%); } to { opacity: 1; transform: translateY(0); } } 
+    @keyframes toastLeave { from { opacity: 1; transform: translateY(0); } to { opacity: 0; transform: translateY(100%); } } 
+}
